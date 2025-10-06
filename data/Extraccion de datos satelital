@@ -1,0 +1,56 @@
+// Sentinel-1 monthly means (VV y VH) + Export per month
+// ==============================
+
+// AOI pequeño: minería ilegal cerca de C.P. Santa Rosa (Interoceánica Sur, La Pampa)
+var aoi = ee.Geometry.Rectangle([-70.106537, -12.979887, -69.915677, -12.842297]);
+Map.centerObject(aoi, 13);
+
+// 2) Colección Sentinel-1
+var s1 = ee.ImageCollection("COPERNICUS/S1_GRD")
+  .filterBounds(aoi)
+  .filterDate('2016-01-01', '2021-12-31')
+  .filter(ee.Filter.eq('instrumentMode', 'IW'))
+  .filter(ee.Filter.eq('orbitProperties_pass', 'DESCENDING')) // cambia a ASCENDING si faltan meses
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
+  .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH'))
+  .filter(ee.Filter.eq('resolution_meters', 10));
+
+// 3) Listas de años y meses
+var years = [2016, 2017, 2018, 2019, 2020, 2021];
+var months = ee.List.sequence(1, 12);
+
+// 4) Bucle doble: año × mes
+years.forEach(function(y){
+  months.getInfo().forEach(function(m){
+    
+    // Definir rango temporal del mes
+    var start = ee.Date.fromYMD(y, m, 1);
+    var end   = start.advance(1, 'month');
+    
+    // Filtrar imágenes de ese mes
+    var monthly = s1.filterDate(start, end).mean();
+    
+    // Solo continuar si hay datos
+    if (monthly) {
+      var img = monthly.clip(aoi)
+                       .select(['VV','VH'])
+                       .rename(['VV_'+y+'_'+m, 'VH_'+y+'_'+m]);
+      
+      // Visual rápida (opcional)
+      Map.addLayer(img.select('VH_'+y+'_'+m), 
+                   {min:-25, max:-5, palette:['#00441b','#238b45','#c7e9c0']}, 
+                   'VH_'+y+'_'+m);
+      
+      // Exportar a Drive
+      Export.image.toDrive({
+        image: img,
+        description: 'S1_SANTAROSA_' + y + '_' + m,
+        folder: 'Hackathon_SAR_Mensual',
+        fileNamePrefix: 'S1_SANTAROSA_' + y + '_' + m,
+        region: aoi,
+        scale: 10,
+        maxPixels: 1e13
+      });
+    }
+  });
+});
