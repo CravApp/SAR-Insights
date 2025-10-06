@@ -16,7 +16,7 @@ Este repositorio contiene el código de la aplicación web construida con **Stre
 
 ### 🧠 Módulo de Visión por Computadora (React)
 
-Este repositorio alberga la lógica del módulo de inteligencia artificial, específicamente para tareas de visión por computadora, y probablemente la interfaz React que lo acompaña o lo integra.
+Este repositorio alberga la presentación del proyecto dónde se desarrolla la interfaz React que lo acompaña o lo integra.
 
 | Componente | Tecnología | Repositorio |
 | :--- | :--- | :--- |
@@ -43,3 +43,4 @@ Detalla los pasos para instalar y ejecutar el proyecto completo o cada component
 ```bash
 git clone [https://github.com/CravApp/sar-insights-web.git](https://github.com/CravApp/sar-insights-web.git)
 git clone [https://github.com/CravApp/sar-eye-ai.git](https://github.com/CravApp/sar-eye-ai.git)
+
