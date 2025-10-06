@@ -14,13 +14,13 @@ Este repositorio contiene el código de la aplicación web construida con **Stre
 | :--- | :--- | :--- |
 | Frontend / Dashboard | Streamlit, Python | [sar-insights-web](https://github.com/CravApp/sar-insights-web) |
 
-### 🧠 Módulo de Visión por Computadora (React)
+### 🧠 Módulo de la presentación fel proyecto  (React)
 
 Este repositorio alberga la presentación del proyecto dónde se desarrolla la interfaz React que lo acompaña o lo integra.
 
 | Componente | Tecnología | Repositorio |
 | :--- | :--- | :--- |
-| Módulo AI / Frontend | React, Visión Artificial | [sar-eye-ai](https://github.com/CravApp/sar-eye-ai) |
+| Módulo AI / Frontend | React, Node.js | [sar-eye-ai](https://github.com/CravApp/sar-eye-ai) |
 
 ---
 
@@ -43,4 +43,5 @@ Detalla los pasos para instalar y ejecutar el proyecto completo o cada component
 ```bash
 git clone [https://github.com/CravApp/sar-insights-web.git](https://github.com/CravApp/sar-insights-web.git)
 git clone [https://github.com/CravApp/sar-eye-ai.git](https://github.com/CravApp/sar-eye-ai.git)
+
 
