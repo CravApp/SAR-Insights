@@ -1,0 +1,73 @@
+---
+title: "Hackaton 8"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+```{r}
+set.seed(42)
+trainIndex <- createDataPartition(features_df$class, p = 0.8, list = FALSE)
+trainData <- features_df[trainIndex, ]
+testData  <- features_df[-trainIndex, ]
+
+modelo_rf <- randomForest(as.factor(class) ~ ., data = trainData, ntree = 300, importance = TRUE)
+
+print(modelo_rf)
+
+```
+
+```{r}
+colSums(is.na(trainData))
+```
+
+```{r}
+# Eliminar columnas vacías
+trainData <- trainData %>% select(where(~ !all(is.na(.))))
+testData  <- testData %>% select(where(~ !all(is.na(.))))
+```
+
+```{r}
+modelo_rf <- randomForest(as.factor(class) ~ ., data = trainData, ntree = 300, importance = TRUE)
+print(modelo_rf)
+```
+
+```{r}
+library(caret)
+pred <- predict(modelo_rf, testData)
+confusionMatrix(pred, as.factor(testData$class))
+```
+
+```{r}
+varImpPlot(modelo_rf)
+```
+
+```{r}
+saveRDS(modelo_rf, "C:/HACKATON/modelo_rf_sar_v1.rds")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,199 @@
+---
+title: "Hackaton_5"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+library(terra)
+
+# Parámetros del tamaño del patch
+# half = número de celdas hacia cada lado desde el punto central
+# ejemplo: si half = 16 → patch de 33x33 píxeles
+
+```{r}
+half <- 16
+```
+  
+# Crear carpeta de salida si no existe
+
+
+```{r}
+if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+```
+
+# Obtener resolución del raster
+
+```{r}
+resx <- res(stack_all)[1]
+resy <- res(stack_all)[2]
+```
+
+# Recorrer los puntos
+
+```{r}
+for (i in 1:nrow(samples_sf)) {
+  coords <- crds(samples_sf[i, ])
+  x <- coords[1]
+  y <- coords[2]
+```
+
+
+# Calcular la extensión del patch
+  
+```{r}
+ext_patch <- ext(
+    x - half * resx,
+    x + half * resx,
+    y - half * resy,
+    y + half * resy
+  )
+```
+  
+# Limitar la extensión al área del raster (evita errores en los bordes)
+ 
+```{r}
+ext_valid <- intersect(ext(stack_all), ext_patch)
+```
+ 
+# Recortar el raster
+  
+```{r}
+patch <- try(crop(stack_all, ext_valid), silent = TRUE)
+```
+
+# Saltar si hay problemas
+
+```{r}
+if (inherits(patch, "try-error") || is.null(patch) || nlyr(patch) == 0) {
+    cat("⚠️  Patch", i, "omitido (fuera del raster)\n")
+    next
+  }
+```
+
+# Asignar etiqueta de clase
+  
+```{r}
+label <- as.character(samples_sf$Clase[i])
+```
+  
+# Crear subcarpeta por clase (opcional, para organización)
+  
+```{r}
+class_dir <- file.path(out_dir, paste0("class_", label))
+  if (!dir.exists(class_dir)) dir.create(class_dir, recursive = TRUE)
+```
+  
+# Guardar patch
+ 
+```{r}
+fname <- sprintf("%s/patch_%03d_class_%s.tif", class_dir, i, label)
+  writeRaster(patch, fname, overwrite = TRUE)
+```
+ 
+```{r}
+cat("✔ Guardado:", fname, "\n")
+}
+```
+  
+  
+  
+  
+
+cat("\n✅ Todos los patches procesados y guardados en:", out_dir, "\n")
+
+
+```{r}
+class(samples_sf)
+nrow(samples_sf)
+head(crds(samples_sf))
+```
+
+library(terra)
+
+# Asegúrate de que estas variables estén definidas:
+# stack_all -> tu raster apilado
+# samples_sf -> tu SpatVector de puntos
+# half -> tamaño del medio patch (en píxeles)
+# out_dir -> carpeta de salida
+
+# Obtener coordenadas una sola vez (más rápido y evita errores)
+coords_all <- crds(samples_sf)
+
+# Resolución del raster
+resx <- res(stack_all)[1]
+resy <- res(stack_all)[2]
+
+# Crear carpeta de salida
+if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+
+# Bucle principal
+for (i in 1:nrow(samples_sf)) {
+  x <- coords_all[i, 1]
+  y <- coords_all[i, 2]
+  
+  # Calcular extensión del patch
+  ext_patch <- ext(
+    x - half * resx,
+    x + half * resx,
+    y - half * resy,
+    y + half * resy
+  )
+  
+  # Evitar que se salga del raster
+  ext_valid <- intersect(ext(stack_all), ext_patch)
+  
+  # Recortar el patch
+  patch <- try(crop(stack_all, ext_valid), silent = TRUE)
+  
+  # Saltar si está vacío o falla
+  if (inherits(patch, "try-error") || is.null(patch) || nlyr(patch) == 0) {
+    cat("⚠️  Patch", i, "omitido (fuera del raster)\n")
+    next
+  }
+  
+  # Obtener etiqueta de clase
+  label <- as.character(samples_sf$Clase[i])
+  
+  # Crear subcarpeta por clase
+  class_dir <- file.path(out_dir, paste0("class_", label))
+  if (!dir.exists(class_dir)) dir.create(class_dir, recursive = TRUE)
+  
+  # Guardar el patch
+  fname <- sprintf("%s/patch_%03d_class_%s.tif", class_dir, i, label)
+  writeRaster(patch, fname, overwrite = TRUE)
+  
+  cat("✔ Guardado:", fname, "\n")
+}
+
+cat("\n✅ Parches creados exitosamente en:", out_dir, "\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

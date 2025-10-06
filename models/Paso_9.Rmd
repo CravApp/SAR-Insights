@@ -1,0 +1,151 @@
+---
+title: "Hackaton 9"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+# VALIDACION DE LOS DATOS Y COMO ES SU CALIDAD PARA EL MODELO
+
+```{r}
+library(caret)
+
+# Predicción sobre el set de prueba
+pred <- predict(modelo_rf, testData)
+
+# Matriz de confusión con métricas completas
+conf_matrix <- confusionMatrix(pred, as.factor(testData$class))
+print(conf_matrix)
+```
+
+```{r}
+# Gráfico de importancia
+varImpPlot(modelo_rf)
+
+# Valores numéricos de importancia
+importance(modelo_rf)
+```
+
+#PARTE FINALPONIENDO A PRUEBA EL MODELO
+
+```{r}
+library(terra)        # Para manejar rasters
+library(randomForest) # Tu modelo RF ya está entrenado
+```
+
+```{r}
+# Ruta del nuevo raster
+new_raster_path <- "C:/HACKATON/TIFF/Hackaton_SAR_Año/"
+
+# Listar los TIFFs
+new_files <- list.files(new_raster_path, pattern = ".tif$", full.names = TRUE)
+
+# Crear un stack
+new_stack <- rast(new_files)
+```
+
+```{r}
+# Estadísticos que usaste en entrenamiento
+mean_r  <- app(new_stack, mean, na.rm = TRUE)
+sd_r    <- app(new_stack, sd, na.rm = TRUE)
+min_r   <- app(new_stack, min, na.rm = TRUE)
+max_r   <- app(new_stack, max, na.rm = TRUE)
+
+# Stack final de features
+features_stack <- c(mean_r, sd_r, min_r, max_r)
+names(features_stack) <- c("mean","sd","min","max")
+
+```
+
+```{r}
+# Convertir a data frame
+features_df <- as.data.frame(features_stack, xy = TRUE, na.rm = FALSE)
+
+# Guardar coordenadas para reconstruir el raster
+coords <- features_df[, c("x","y")]
+features_df <- features_df[, c("mean","sd","min","max")]
+```
+
+
+```{r}
+# Predecir clases por pixel
+pred_class <- predict(modelo_rf, features_df)
+
+# Combinar con coordenadas
+pred_df <- cbind(coords, class = as.character(pred_class))
+```
+
+```{r}
+# Crear raster vacío con la misma geometría
+r_class <- rast(new_stack[[1]])
+values(r_class) <- NA
+
+# Asignar valores predichos
+r_class[] <- as.numeric(factor(pred_df$class, 
+                                levels = c("Bosque_intacto","Degradado","No_bosque")))
+
+# Asignar niveles de clase
+levels(r_class) <- data.frame(ID=1:3, Class=c("Bosque_intacto","Degradado","No_bosque"))
+
+# Guardar raster final
+writeRaster(r_class, "C:/HACKATON/prediccion_RF_nuevo.tif", overwrite = TRUE)
+```
+
+
+#PARTE FINALPONIENDO A PRUEBA EL MODELO 2 (LUGAR DIFERENTE)
+
+# Ruta del nuevo raster
+new_raster_file <- "C:/HACKATON/TIFF/S1_PUCALLPA_20252025.tif"
+
+# Cargar el raster
+new_raster <- rast(new_raster_file)
+
+# Estadísticos por pixel
+mean_r  <- app(new_raster, mean, na.rm = TRUE)
+sd_r    <- app(new_raster, sd, na.rm = TRUE)
+min_r   <- app(new_raster, min, na.rm = TRUE)
+max_r   <- app(new_raster, max, na.rm = TRUE)
+
+# Stack final de features
+features_stack <- c(mean_r, sd_r, min_r, max_r)
+names(features_stack) <- c("mean","sd","min","max")
+
+# Convertir a data frame
+features_df <- as.data.frame(features_stack, xy = TRUE, na.rm = FALSE)
+
+# Guardar coordenadas
+coords <- features_df[, c("x","y")]
+
+# features
+features_df <- features_df[, c("mean","sd","min","max")]
+
+# Predecir clases
+pred_class <- predict(modelo_rf, features_df)
+
+# Combinar con coordenadas
+
+pred_df <- cbind(coords, class = as.character(pred_class))
+
+# Crear raster vacío con la misma geometría que el original
+
+r_class <- rast(new_raster[[1]])
+
+values(r_class) <- NA
+
+# Asignar valores predichos
+r_class[] <- as.numeric(factor(pred_df$class, 
+                                levels = c("Bosque_intacto","Degradado","No_bosque")))
+
+# Asignar niveles de clase
+levels(r_class) <- data.frame(ID=1:3, Class=c("Bosque_intacto","Degradado","No_bosque"))
+
+# Guardar raster final
+writeRaster(r_class, "C:/HACKATON/prediccion_RF_PUCALLPA.tif", overwrite = TRUE)
+
+
+
+
+
+
+
+

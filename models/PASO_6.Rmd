@@ -1,0 +1,73 @@
+---
+title: "Hackaton_6"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+library(terra)
+
+# === Parámetros ===
+# out_dir: carpeta donde guardaste todos los patches (ya la tienes)
+# samples_sf: tus puntos originales
+# coords_all: coordenadas que usamos en el bucle anterior
+
+# Recolectar todos los archivos .tif (en subcarpetas)
+patch_files <- list.files(out_dir, pattern = "\\.tif$", recursive = TRUE, full.names = TRUE)
+
+# Crear un dataframe base con información de ruta y clase
+patch_info <- data.frame(
+  file_path = patch_files,
+  class = sub(".*class_(.*)\\.tif$", "\\1", basename(patch_files)),
+  stringsAsFactors = FALSE
+)
+
+# (Opcional) Agregar coordenadas (x, y) correspondientes
+# Esto asume que los nombres de archivos siguen el patrón patch_###_class_X.tif
+patch_info$index <- as.numeric(sub("patch_([0-9]+)_.*", "\\1", basename(patch_files)))
+patch_info <- patch_info[order(patch_info$index), ]
+
+# Agregar coordenadas (solo si tienes la matriz coords_all)
+patch_info$x <- coords_all[patch_info$index, 1]
+patch_info$y <- coords_all[patch_info$index, 2]
+
+# Guardar CSV
+csv_path <- file.path(out_dir, "patch_metadata.csv")
+write.csv(patch_info, csv_path, row.names = FALSE)
+
+cat("✅ Archivo CSV creado en:", csv_path, "\n")
+head(patch_info)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

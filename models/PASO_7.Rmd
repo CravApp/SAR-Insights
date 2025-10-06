@@ -1,0 +1,81 @@
+---
+title: "Hackaton_7"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+```{r}
+install.packages(c("raster", "terra", "glcm", "caret", "randomForest", "dplyr"))
+library(raster)
+library(terra)
+library(glcm)
+library(caret)
+library(randomForest)
+library(dplyr)
+
+```
+
+csv_path <- "C:/HACKATON/PATCHES/patch_metadata.csv"
+patches_dir <- "C:/HACKATON/PATCHES"
+
+
+```{r}
+csv_path <- "C:/HACKATON/TIFF/Patches/patch_metadata.csv"
+patches_df <- read.csv(csv_path)
+head(patches_df)
+
+```
+
+```{r}
+extract_features <- function(file_path) {
+  r <- rast(file_path)
+  vals <- values(r)
+  vals <- vals[!is.na(vals)]
+  
+  # Estadísticas básicas
+  mean_val <- mean(vals)
+  sd_val   <- sd(vals)
+  min_val  <- min(vals)
+  max_val  <- max(vals)
+  
+  # Textura GLCM (entropía y contraste)
+  glcm_stats <- tryCatch({
+    g <- glcm(r[[1]], window = c(3,3))
+    list(entropy = mean(values(g$entropy), na.rm = TRUE),
+         contrast = mean(values(g$contrast), na.rm = TRUE))
+  }, error = function(e) list(entropy = NA, contrast = NA))
+  
+  data.frame(
+    mean = mean_val,
+    sd = sd_val,
+    min = min_val,
+    max = max_val,
+    entropy = glcm_stats$entropy,
+    contrast = glcm_stats$contrast
+  )
+}
+```
+
+```{r}
+features_list <- lapply(patches_df$file_path, extract_features)
+features_df <- bind_rows(features_list)
+
+# Añadimos la clase
+features_df$class <- patches_df$class
+
+head(features_df)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

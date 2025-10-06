@@ -1,0 +1,92 @@
+---
+title: "Hackaton_2"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+# ===========================
+# 2) Calcular Rsum_max (CuSum)
+# ===========================
+
+
+```{r}
+library(terra)
+```
+
+# Cargar el stack generado
+
+```{r}
+stack_all <- rast("C:/HACKATON/TIFF/Hackathon_SAR_Mensual/S1_SANTAROSA_Stack_2016_2021.tif")
+```
+
+# Seleccionar solo las bandas VH
+
+
+```{r}
+vh_bands <- stack_all[[grep("^VH", names(stack_all))]]
+```
+
+# Asegurar que estén ordenadas cronológicamente
+
+
+```{r}
+vh_bands <- vh_bands[[order(names(vh_bands))]]
+```
+
+# Convertir a matriz temporal
+
+
+```{r}
+vh_mat <- as.array(vh_bands)
+```
+
+# Función CuSum pixel a pixel
+
+
+```{r}
+cusum_fun <- function(x) {
+  if (all(is.na(x))) return(NA)
+  dev <- x - median(x, na.rm = TRUE)
+  running <- 0
+  maxsum <- 0
+  for (v in -dev) {  # se invierte para acumular caídas
+    running <- max(0, running + v)
+    maxsum <- max(maxsum, running)
+  }
+  return(maxsum)
+}
+```
+
+# Aplicar CuSum a cada píxel
+
+
+```{r}
+Rsum_max <- app(vh_bands, fun = cusum_fun)
+```
+
+# Guardar resultado
+
+```{r}
+out_rsum <- "C:/HACKATON/TIFF/Hackathon_SAR_Mensual/Rsum_max_VH_SANTAROSA.tif"
+writeRaster(Rsum_max, out_rsum, overwrite = TRUE)
+```
+
+```{r}
+cat("✅ Rsum_max calculado y guardado en:\n", out_rsum, "\n")
+```
+
+```{r}
+plot(Rsum_max, col = terrain.colors(100))
+```
+
+
+
+
+
+
+
+
+
+
+

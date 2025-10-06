@@ -1,0 +1,187 @@
+---
+title: "Hackaton_4"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+# ===========================
+# 4) CREAR PATCHES DE ENTRENAMIENTO
+# ===========================
+
+```{r}
+library(terra)
+library(dplyr)
+```
+
+
+
+# Cargar stack SAR y mapa clasificado
+
+```{r}
+stack_all <- rast("C:/HACKATON/TIFF/Hackathon_SAR_Mensual/S1_SANTAROSA_Stack_2016_2021.tif")
+class_map <- rast("C:/HACKATON/TIFF/Hackathon_SAR_Mensual/Clasificacion_Rsum_SANTAROSA.tif")
+```
+
+
+# Asegurar mismo tamaño y extensión
+```{r}
+class_map <- resample(class_map, stack_all[[1]], method = "near")
+```
+
+# Elegir tamaño de patch (por ejemplo 128x128 píxeles)
+
+
+```{r}
+patch_size <- 128
+half <- patch_size / 2
+```
+
+# Seleccionar píxeles representativos de cada clase
+# 1 = bosque, 2 = degradado, 3 = no bosque
+
+```{r}
+set.seed(42)
+samples_df <- as.data.frame(class_map, xy = TRUE)
+samples_df <- na.omit(samples_df)
+```
+
+
+# Seleccionar N muestras por clase
+
+
+```{r}
+n <- 100  # puedes ajustar según RAM o tiempo
+samples_sel <- samples_df %>%
+  group_by(Clase) %>%
+  sample_n(size = min(n(), n)) %>%
+  ungroup()
+```
+
+# Convertir a vectores espaciales
+
+
+```{r}
+samples_sf <- vect(samples_sel, geom = c("x", "y"), crs = crs(stack_all))
+```
+
+# Crear carpeta para exportar parches
+
+```{r}
+out_dir <- "C:/HACKATON/TIFF/Patches"
+dir.create(out_dir, showWarnings = FALSE)
+```
+
+
+# Extraer y guardar patches
+
+# ===========================
+# Extraer y guardar patches (versión corregida)
+# ===========================
+
+```{r}
+for (i in 1:nrow(samples_sf)) {
+  coords <- geom(samples_sf)[i,]
+  x <- coords[1]
+  y <- coords[2]
+```
+
+
+# Calcular la extensión del patch (en grados, ya que tu raster está en EPSG:4326)
+ 
+```{r}
+ext_patch <- ext(
+    x - half * res(stack_all)[1],
+    x + half * res(stack_all)[1],
+    y - half * res(stack_all)[2],
+    y + half * res(stack_all)[2]
+  )
+```
+ 
+  
+  
+# Recortar y verificar que el recorte no esté vacío
+  patch <- try(crop(stack_all, ext_patch), silent = TRUE)
+  if (inherits(patch, "try-error") || is.null(patch) || nlyr(patch) == 0) {
+    next  # saltar este punto si no hay datos válidos
+  }
+  
+  # Asignar etiqueta usando la columna "Clase"
+  label <- as.character(samples_sf$Clase[i])
+  
+  # Guardar patch con nombre claro
+  fname <- sprintf("%s/patch_%03d_class_%s.tif", out_dir, i, label)
+  writeRaster(patch, fname, overwrite = TRUE)
+  
+  cat("✔ Guardado:", fname, "\n")
+}
+
+cat("\n✅ Parches creados exitosamente en:", out_dir, "\n")
+
+
+
+
+```{r}
+library(terra)
+
+for (i in 1:nrow(samples_sf)) {
+  # Obtener coordenadas de un SpatVector
+  coords <- crds(samples_sf[i, ])
+  x <- coords[1]
+  y <- coords[2]
+  
+  # Calcular la extensión del patch
+  ext_patch <- ext(
+    x - half * res(stack_all)[1],
+    x + half * res(stack_all)[1],
+    y - half * res(stack_all)[2],
+    y + half * res(stack_all)[2]
+  )
+  
+  # Recortar y verificar
+  patch <- try(crop(stack_all, ext_patch), silent = TRUE)
+  if (inherits(patch, "try-error") || is.null(patch) || nlyr(patch) == 0) {
+    next
+  }
+  
+  # Guardar patch
+  label <- as.character(samples_sf$Clase[i])
+  fname <- sprintf("%s/patch_%03d_class_%s.tif", out_dir, i, label)
+  writeRaster(patch, fname, overwrite = TRUE)
+  
+  cat("✔ Guardado:", fname, "\n")
+}
+
+cat("\n✅ Parches creados exitosamente en:", out_dir, "\n")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

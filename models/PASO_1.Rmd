@@ -1,0 +1,128 @@
+---
+title: "Hackaton"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+# ===========================
+# 1) VALIDAR Y APILAR TIFFs
+# ===========================
+
+# Instalar paquetes si no los tienes
+# install.packages(c("terra", "stringr"))
+
+
+```{r}
+library(terra)
+library(stringr)
+```
+
+# Carpeta donde están tus TIFFs
+
+```{r}
+folder <- "C:/HACKATON/TIFF/Hackathon_SAR_Mensual"
+```
+
+# Listar los archivos .tif
+
+
+```{r}
+files <- list.files(folder, pattern = "\\.tif$", full.names = TRUE)
+```
+
+# Extraer año y mes del nombre (S1_SANTAROSA_2017_3)
+
+
+```{r}
+extract_date <- function(fname) {
+  matches <- str_match(basename(fname), "S1_SANTAROSA_(\\d{4})_(\\d{1,2})")
+  year <- as.numeric(matches[2])
+  month <- as.numeric(matches[3])
+  list(year = year, month = month)
+}
+```
+
+# Ordenar los archivos por año y mes
+
+
+```{r}
+file_dates <- lapply(files, extract_date)
+order_index <- order(sapply(file_dates, function(x) x$year),
+                     sapply(file_dates, function(x) x$month))
+files <- files[order_index]
+```
+
+# Leer y validar proyección/resolución
+
+```{r}
+r_list <- lapply(files, rast)
+crs_ref <- crs(r_list[[1]])
+res_ref <- res(r_list[[1]])
+ext_ref <- ext(r_list[[1]])
+
+for (i in seq_along(r_list)) {
+  if (!compareGeom(r_list[[i]], r_list[[1]], stopOnError = FALSE)) {
+    message("Reproyectando o ajustando: ", basename(files[i]))
+    r_list[[i]] <- project(r_list[[i]], crs_ref, method = "bilinear", res = res_ref)
+    r_list[[i]] <- crop(r_list[[i]], ext_ref)
+  }
+}
+```
+
+
+# Apilar todas las imágenes en un solo SpatRaster
+
+
+```{r}
+stack_all <- rast(r_list)
+```
+
+# Verificar bandas
+
+```{r}
+print(stack_all)
+```
+
+
+# Guardar stack (opcional)
+
+```{r}
+out_path <- file.path(folder, "S1_SANTAROSA_Stack_2016_2021.tif")
+writeRaster(stack_all, out_path, overwrite = TRUE)
+```
+
+```{r}
+cat("\n✅ Stack creado con éxito en:\n", out_path, "\n")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

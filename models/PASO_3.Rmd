@@ -1,0 +1,148 @@
+---
+title: "Hacjkaton_3"
+author: "Cristhian"
+date: "2025-10-05"
+output: html_document
+---
+
+# ===========================
+# 3) CLASIFICACIÓN Rsum_max
+# ===========================
+
+
+```{r}
+library(terra)
+```
+
+# Cargar el raster Rsum_max
+
+
+```{r}
+Rsum_max <- rast("C:/HACKATON/TIFF/Hackathon_SAR_Mensual/Rsum_max_VH_SANTAROSA.tif")
+```
+
+# Inspeccionar rango de valores
+
+
+```{r}
+summary(values(Rsum_max))
+```
+
+# Definir umbrales (ajustables)
+# Estos se basan en la escala que describiste (50–350 aprox)
+# Puedes ir afinando visualmente
+
+```{r}
+t_bosque     <- 100   # <180 = bosque intacto
+```
+
+```{r}
+t_degradado  <- 250   # 180–250 = degradado
+```
+
+
+# >250 = no bosque (minería)
+
+# Clasificar
+
+```{r}
+class_rsum <- classify(Rsum_max,
+                       rbind(
+                         c(-Inf, t_bosque,    1),  # 1 = Bosque intacto
+                         c(t_bosque, t_degradado, 2),  # 2 = Bosque degradado
+                         c(t_degradado, Inf,     3)   # 3 = No bosque / minería
+                       ))
+```
+
+# Asignar nombres
+
+
+```{r}
+levels(class_rsum) <- data.frame(ID = 1:3,
+                                 Clase = c("Bosque_intacto", "Degradado", "No_bosque"))
+```
+
+# Visualizar
+
+```{r}
+plot(class_rsum,
+     col = c("#006400", "#FFD700", "#CD5C5C"),
+     main = "Mapa de degradacion de cinco años (2016–2021)")
+```
+
+
+# Guardar resultado
+
+```{r}
+writeRaster(class_rsum,
+            "C:/HACKATON/TIFF/Hackathon_SAR_Mensual/Clasificacion_Rsum_SANTAROSA.tif",
+            overwrite = TRUE)
+```
+
+```{r}
+cat("✅ Clasificación generada y guardada como 'Clasificacion_Rsum_SANTAROSA.tif'\n")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
