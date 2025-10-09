@@ -1,47 +1,45 @@
-# 🚀 Proyecto Principal: Plataforma de Análisis e Insights de SAR
+# 🚀 Main Project: SAR Insights and Analysis Platform
 
-Una descripción breve y concisa de tu proyecto general. Explica su propósito principal, qué problema resuelve y para quién está dirigido.
+A brief and concise description of your overall project. Explain its main purpose, what problem it solves, and who it is intended for.
 
-## 🔗 Componentes del Repositorio
+## 🔗 Repository Components
 
-Este proyecto está dividido en dos componentes principales, cada uno con su propio repositorio para la gestión de su código fuente:
+This project is divided into two main components, each with its own repository for managing its source code:
 
-### 📊 Interfaz Web (Streamlit)
+### 📊 Web Interface (Streamlit)
 
-Este repositorio contiene el código de la aplicación web construida con **Streamlit**, utilizada para la visualización de datos, análisis de insights y la interacción del usuario.
+This repository contains the code for the web application built with **Streamlit**, used for data visualization, insight analysis, and user interaction.
 
-| Componente | Tecnología | Repositorio |
+| Component | Technology | Repository |
 | :--- | :--- | :--- |
 | Frontend / Dashboard | Streamlit, Python | [sar-insights-web](https://github.com/CravApp/sar-insights-web) |
 
-### 🧠 Módulo de la presentación fel proyecto  (React)
+### 🧠 Project Presentation Module (React)
 
-Este repositorio alberga la presentación del proyecto dónde se desarrolla la interfaz React que lo acompaña o lo integra.
+This repository houses the project presentation where the accompanying or integrated React interface is developed.
 
-| Componente | Tecnología | Repositorio |
+| Component | Technology | Repository |
 | :--- | :--- | :--- |
-| Módulo AI / Frontend | React, Node.js | [sar-eye-ai](https://github.com/CravApp/sar-eye-ai) |
+| AI / Frontend Module | React, Node.js | [sar-eye-ai](https://github.com/CravApp/sar-eye-ai) |
 
 ---
 
-## 🛠️ Tecnologías Clave
+## 🛠️ Key Technologies
 
-Menciona aquí las tecnologías más importantes utilizadas en el proyecto completo.
+List the most important technologies used in the entire project here.
 
 * **Frontend (Insights):** Streamlit, Python.
-* **Frontend (AI/Visualización):** React.
-* **Backend/Lógica AI:** (Incluye aquí si hay un backend central o más detalles de la IA).
+* **Frontend (AI/Visualization):** React.
+* **Backend/AI Logic:** (Include here if there is a core backend or more details about the AI.)
 
 ---
 
-## ⚙️ Instalación y Configuración
+## ⚙️ Installation and Configuration
 
-Detalla los pasos para instalar y ejecutar el proyecto completo o cada componente por separado (si es necesario).
+Details the steps to install and run the entire project or each component separately (if necessary).
 
-**1. Clonar los Repositorios**
+**1. Clone the Repositories**
 
 ```bash
 git clone [https://github.com/CravApp/sar-insights-web.git](https://github.com/CravApp/sar-insights-web.git)
 git clone [https://github.com/CravApp/sar-eye-ai.git](https://github.com/CravApp/sar-eye-ai.git)
-
-
